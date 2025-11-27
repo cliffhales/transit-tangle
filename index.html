@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transit Tangle</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Transit Tangle</h1>
+    </header>
+    <main>
+        <div id="map-container">
+            <canvas id="game-map"></canvas>
+        </div>
+        <aside id="ui-panel">
+            <div class="panel-section">
+                <h2>Score: <span id="score-display">0</span></h2>
+                <button id="reset-btn">Reset Level</button>
+            </div>
+            
+            <div class="panel-section">
+                <h3>Buses</h3>
+                <div id="buses-list" class="card-list">
+                    <!-- Buses will be injected here -->
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Trips</h3>
+                <div id="trips-list" class="card-list">
+                    <!-- Trips will be injected here -->
+                </div>
+            </div>
+            
+            <div id="message-area"></div>
+        </aside>
+    </main>
+    <script src="game.js"></script>
+</body>
+</html>

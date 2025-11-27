@@ -1,0 +1,161 @@
+:root {
+    --bg-color: #f4f4f9;
+    --panel-bg: #ffffff;
+    --text-color: #333;
+    --accent-color: #3498db;
+    --accent-hover: #2980b9;
+    --border-color: #ddd;
+    --success-color: #2ecc71;
+    --warning-color: #f1c40f;
+    --error-color: #e74c3c;
+    --selected-color: #e8f6fd;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    background-color: var(--panel-bg);
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+h1 {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+}
+
+main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+#map-container {
+    flex: 1;
+    position: relative;
+    background-color: #eef2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+canvas {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+#ui-panel {
+    width: 350px;
+    background-color: var(--panel-bg);
+    border-left: 1px solid var(--border-color);
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.panel-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+h2, h3 {
+    margin-bottom: 0.5rem;
+}
+
+button {
+    padding: 0.5rem 1rem;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: var(--accent-hover);
+}
+
+.card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.card {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    border-color: var(--accent-color);
+}
+
+.card.selected {
+    background-color: var(--selected-color);
+    border-color: var(--accent-color);
+    border-width: 2px;
+}
+
+.card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #f9f9f9;
+}
+
+.card-header {
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.card-details {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.status-badge {
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background-color: #eee;
+}
+
+.status-ontime { background-color: var(--success-color); color: white; }
+.status-late { background-color: var(--warning-color); color: #333; }
+.status-missed { background-color: var(--error-color); color: white; }
+
+#message-area {
+    margin-top: auto;
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+}
