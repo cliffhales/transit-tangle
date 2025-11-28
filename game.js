@@ -4,39 +4,19 @@
 
 // --- Constants & Data ---
 
-const LEVEL_1 = {
-    stops: [
-        { id: 1, name: "Depot", x: 100, y: 300 },
-        { id: 2, name: "Mall", x: 300, y: 150 },
-        { id: 3, name: "Hospital", x: 400, y: 350 },
-        { id: 4, name: "Station", x: 600, y: 250 }
-    ],
-    routes: [
-        { from: 1, to: 2, time: 15 },
-        { from: 2, to: 3, time: 10 },
-        { from: 3, to: 4, time: 12 },
-        { from: 1, to: 3, time: 20 },
-        { from: 2, to: 4, time: 18 }
-    ],
-    buses: [
-        { id: "Bus 1", startStop: 1, startTime: "08:00" },
-        { id: "Bus 2", startStop: 2, startTime: "08:15" }
-    ],
-    trips: [
-        { id: "Trip A", from: 1, to: 3, latestArrival: "08:40" },
-        { id: "Trip B", from: 2, to: 4, latestArrival: "09:00" },
-        { id: "Trip C", from: 3, to: 4, latestArrival: "09:15" },
-        { id: "Trip D", from: 1, to: 2, latestArrival: "08:30" }
-    ]
-};
+// --- Constants & Data ---
+
+// LEVEL_1 removed. Using LEVELS from levels.js
 
 // --- State ---
 
 let gameState = {
+    levelIndex: 0,
     score: 0,
     buses: [],
     trips: [],
-    selectedBusId: null
+    selectedBusId: null,
+    levelData: null // Current level reference
 };
 
 // --- Time Utilities ---
@@ -67,12 +47,12 @@ function buildGraph(stops, routes) {
 function getTravelTime(fromId, toId) {
     if (fromId === toId) return 0;
 
-    const adj = buildGraph(LEVEL_1.stops, LEVEL_1.routes);
+    const adj = buildGraph(gameState.levelData.stops, gameState.levelData.routes);
     const dist = {};
     const visited = new Set();
     const pq = []; // Simple priority queue (array sorted by dist)
 
-    LEVEL_1.stops.forEach(s => dist[s.id] = Infinity);
+    gameState.levelData.stops.forEach(s => dist[s.id] = Infinity);
     dist[fromId] = 0;
     pq.push({ id: fromId, dist: 0 });
 
@@ -102,11 +82,19 @@ function getTravelTime(fromId, toId) {
 // --- Game Logic ---
 
 function initGame() {
-    // Deep copy level data to state
+    // Load current level
+    if (gameState.levelIndex >= LEVELS.length) {
+        alert("You have beaten all levels! Game Over.");
+        gameState.levelIndex = 0;
+    }
+
+    gameState.levelData = LEVELS[gameState.levelIndex];
+    const level = gameState.levelData;
+
     gameState.score = 0;
     gameState.selectedBusId = null;
 
-    gameState.buses = LEVEL_1.buses.map(b => ({
+    gameState.buses = level.buses.map(b => ({
         ...b,
         currentStop: b.startStop,
         currentTime: parseTime(b.startTime),
@@ -118,13 +106,19 @@ function initGame() {
         history: [] // To track completed trips
     }));
 
-    gameState.trips = LEVEL_1.trips.map(t => ({
-        ...t,
+    gameState.trips = level.trips.map(t => ({
         ...t,
         status: 'pending', // pending, in-transit, completed
         assignedTo: null,
         result: null
     }));
+
+    // Update Title
+    document.querySelector('h1').textContent = `Transit Tangle - Level ${level.id}: ${level.name}`;
+
+    // Clear any existing overlays
+    const existingOverlay = document.getElementById('level-complete-overlay');
+    if (existingOverlay) existingOverlay.remove();
 
     render();
 }
@@ -255,7 +249,7 @@ function executeRoute() {
             // Check Level Complete
             const allCompleted = gameState.trips.every(t => t.status === 'completed');
             if (allCompleted) {
-                setTimeout(() => alert(`Level Complete! Score: ${gameState.score}`), 100);
+                showLevelComplete();
             }
 
             stepIndex++;
@@ -299,9 +293,9 @@ function drawMap() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Draw routes
-    LEVEL_1.routes.forEach(r => {
-        const s1 = LEVEL_1.stops.find(s => s.id === r.from);
-        const s2 = LEVEL_1.stops.find(s => s.id === r.to);
+    gameState.levelData.routes.forEach(r => {
+        const s1 = gameState.levelData.stops.find(s => s.id === r.from);
+        const s2 = gameState.levelData.stops.find(s => s.id === r.to);
 
         ctx.beginPath();
         ctx.moveTo(s1.x, s1.y);
@@ -319,7 +313,7 @@ function drawMap() {
     });
 
     // Draw stops
-    LEVEL_1.stops.forEach(s => {
+    gameState.levelData.stops.forEach(s => {
         ctx.beginPath();
         ctx.arc(s.x, s.y, 15, 0, Math.PI * 2);
         ctx.fillStyle = '#fff';
@@ -345,7 +339,7 @@ function drawMap() {
     if (gameState.selectedBusId) {
         const bus = gameState.buses.find(b => b.id === gameState.selectedBusId);
         if (bus) {
-            const stop = LEVEL_1.stops.find(s => s.id === bus.currentStop);
+            const stop = gameState.levelData.stops.find(s => s.id === bus.currentStop);
             if (stop) {
                 ctx.beginPath();
                 ctx.arc(stop.x, stop.y, 22, 0, Math.PI * 2);
@@ -368,9 +362,9 @@ function renderUI() {
         el.className = `card ${gameState.selectedBusId === bus.id ? 'selected' : ''}`;
         el.onclick = () => selectBus(bus.id);
 
-        const stopName = LEVEL_1.stops.find(s => s.id === bus.currentStop).name;
+        const stopName = gameState.levelData.stops.find(s => s.id === bus.currentStop).name;
 
-        const routeNames = bus.route.map(sid => LEVEL_1.stops.find(s => s.id === sid).name).join(' &rarr; ');
+        const routeNames = bus.route.map(sid => gameState.levelData.stops.find(s => s.id === sid).name).join(' &rarr; ');
 
         el.innerHTML = `
             <div class="card-header">
@@ -398,8 +392,8 @@ function renderUI() {
             el.onclick = () => planTrip(trip.id);
         }
 
-        const fromName = LEVEL_1.stops.find(s => s.id === trip.from).name;
-        const toName = LEVEL_1.stops.find(s => s.id === trip.to).name;
+        const fromName = gameState.levelData.stops.find(s => s.id === trip.from).name;
+        const toName = gameState.levelData.stops.find(s => s.id === trip.to).name;
 
         let statusHtml = '';
         if (trip.result) {
@@ -444,16 +438,50 @@ canvas.addEventListener('click', (e) => {
     const y = e.clientY - rect.top;
 
     // Check if clicked a stop
-    // Disabled manual move for Route Planning mode
-    /*
-    const clickedStop = LEVEL_1.stops.find(s => {
+    const clickedStop = gameState.levelData.stops.find(s => {
         const dx = s.x - x;
         const dy = s.y - y;
-        return Math.sqrt(dx*dx + dy*dy) < 20; // 20px radius
+        return Math.sqrt(dx * dx + dy * dy) < 20; // 20px radius
     });
 
     if (clickedStop) {
-        moveBus(clickedStop.id);
+        // moveBus(clickedStop.id); // Disabled for route planning
     }
-    */
 });
+
+function showLevelComplete() {
+    const overlay = document.createElement('div');
+    overlay.id = 'level-complete-overlay';
+    overlay.style.position = 'absolute';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0,0,0,0.8)';
+    overlay.style.display = 'flex';
+    overlay.style.flexDirection = 'column';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.color = 'white';
+    overlay.style.zIndex = '1000';
+
+    overlay.innerHTML = `
+        <h1>Level Complete!</h1>
+        <h2>Score: ${gameState.score}</h2>
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button id="next-level-btn" style="padding: 10px 20px; font-size: 1.2rem; background-color: #2ecc71; border: none; border-radius: 5px; cursor: pointer; color: white;">Next Level</button>
+            <button id="replay-level-btn" style="padding: 10px 20px; font-size: 1.2rem; background-color: #3498db; border: none; border-radius: 5px; cursor: pointer; color: white;">Replay</button>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    document.getElementById('next-level-btn').onclick = () => {
+        gameState.levelIndex++;
+        initGame();
+    };
+
+    document.getElementById('replay-level-btn').onclick = () => {
+        initGame();
+    };
+}
