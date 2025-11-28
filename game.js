@@ -160,8 +160,15 @@ function planTrip(tripId) {
     const trip = gameState.trips.find(t => t.id === tripId);
 
     if (!bus || !trip) return;
-    if (trip.status !== 'pending') return;
+    if (trip.status !== 'pending' && trip.status !== 'assigned') return;
     if (bus.assignedTrips.includes(tripId)) return;
+
+    // Re-assignment Logic
+    const previousBus = gameState.buses.find(b => b.assignedTrips.includes(tripId));
+    if (previousBus) {
+        // Remove from previous bus
+        previousBus.assignedTrips = previousBus.assignedTrips.filter(id => id !== tripId);
+    }
 
     // Smart Route Building
     // 1. Ensure Start is in route
@@ -383,9 +390,10 @@ function renderUI() {
 
     const busesList = document.getElementById('buses-list');
     busesList.innerHTML = '';
-    gameState.buses.forEach(bus => {
+    gameState.buses.forEach((bus, index) => {
         const el = document.createElement('div');
-        el.className = `card ${gameState.selectedBusId === bus.id ? 'selected' : ''}`;
+        // Add color class to bus card
+        el.className = `card ${gameState.selectedBusId === bus.id ? 'selected' : ''} assigned-bus-${index + 1}`;
         el.onclick = () => selectBus(bus.id);
 
         const stopName = gameState.levelData.stops.find(s => s.id === bus.currentStop).name;
@@ -414,7 +422,16 @@ function renderUI() {
     gameState.trips.forEach(trip => {
         const el = document.createElement('div');
         el.className = `card ${trip.status === 'completed' ? 'disabled' : ''}`;
-        if (trip.status === 'pending') {
+
+        // Add color class if assigned
+        if (trip.assignedTo) {
+            const busIndex = gameState.buses.findIndex(b => b.id === trip.assignedTo);
+            if (busIndex !== -1) {
+                el.classList.add(`assigned-bus-${busIndex + 1}`);
+            }
+        }
+
+        if (trip.status === 'pending' || trip.status === 'assigned') {
             el.onclick = () => planTrip(trip.id);
         }
 

@@ -159,3 +159,9 @@ button:hover {
     text-align: center;
     font-weight: bold;
 }
+/* Bus Assignment Indicators */
+.assigned-bus-1 { border-left: 5px solid #3498db !important; }
+.assigned-bus-2 { border-left: 5px solid #e74c3c !important; }
+.assigned-bus-3 { border-left: 5px solid #2ecc71 !important; }
+.assigned-bus-4 { border-left: 5px solid #e67e22 !important; }
+.assigned-bus-5 { border-left: 5px solid #9b59b6 !important; }
