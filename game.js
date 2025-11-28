@@ -81,6 +81,26 @@ function getTravelTime(fromId, toId) {
 
 // --- Game Logic ---
 
+function initLevelSelector() {
+    const selector = document.getElementById('level-select');
+    selector.innerHTML = '';
+    LEVELS.forEach((level, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `${level.id}: ${level.name}`;
+        selector.appendChild(option);
+    });
+
+    selector.value = gameState.levelIndex;
+
+    selector.onchange = (e) => {
+        gameState.levelIndex = parseInt(e.target.value);
+        initGame();
+        // Remove focus so spacebar/keys don't trigger it again
+        selector.blur();
+    };
+}
+
 function initGame() {
     // Load current level
     if (gameState.levelIndex >= LEVELS.length) {
@@ -115,6 +135,12 @@ function initGame() {
 
     // Update Title
     document.querySelector('h1').textContent = `Transit Tangle - Level ${level.id}: ${level.name}`;
+
+    // Update Selector (if it exists and doesn't match)
+    const selector = document.getElementById('level-select');
+    if (selector && parseInt(selector.value) !== gameState.levelIndex) {
+        selector.value = gameState.levelIndex;
+    }
 
     // Clear any existing overlays
     const existingOverlay = document.getElementById('level-complete-overlay');
@@ -485,3 +511,8 @@ function showLevelComplete() {
         initGame();
     };
 }
+
+// Initialize Selector once
+window.addEventListener('load', () => {
+    initLevelSelector();
+});
